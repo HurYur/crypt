@@ -1,0 +1,25 @@
+html{
+	font-family: Arial;
+}
+table{
+	border-collapse: collapse;
+	margin: 20px auto;
+}
+td, th{
+	padding: 10px 20px;
+	border: 1px solid lightgrey;
+}
+tr{
+	cursor: pointer;
+}
+tr.active{
+	background-color: lightblue;
+	border: 2px solid black;
+}
+.filter-container{
+	text-align: center;
+}
+input{
+	display: inline-block;
+	width: 150px;
+}
