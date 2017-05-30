@@ -15,11 +15,21 @@ tr{
 tr.active{
 	background-color: lightblue;
 	border: 2px solid black;
+	border-bottom: none;
 }
-.filter-container{
+tr.active td{
+	border-bottom: none;
+}
+.filter-container,
+.coins-container{
 	text-align: center;
 }
 input{
 	display: inline-block;
 	width: 150px;
+}
+.coin-price{
+	display: inline-block;
+	text-align: center;
+	padding: 10px 20px;
 }

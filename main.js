@@ -1,6 +1,6 @@
 let coinData;
 $.ajax({
-  	url: "https://api.coinmarketcap.com/v1/ticker/?limit=10",
+  	url: "https://api.coinmarketcap.com/v1/ticker/?limit=50",
   	context: document.body
 }).done(function(data) {
 	// Create table with coins
@@ -20,23 +20,7 @@ let createTable = (data) =>{
  		propertiesName = ['Rank', 'Market capitalization $', 'Name','Symbol', 'Price $'];
  		properties = ['rank', 'market_cap_usd', 'name' ,'symbol' , 'price_usd'];
 
-	 	tr.addEventListener("click", (e) => {
-			e.target.parentNode.classList.toggle("active");
-			let coinName = e.target.parentNode.childNodes[3].innerText;
-			uploadInfo(coinName);
-
-			let d = new Date();
-			let monthes = [1 ,3 ,6 ,12];
-
-			monthes.forEach( (month)=>{
-				var myDate="26-02-2016";
-				myDate=myDate.split("-");
-				var newDate=myDate[1]+"/"+myDate[0]+"/"+myDate[2];
-
-
-				uploadInfoByMonth(coinName, new Date(newDate).getTime());
-			});
-		});
+ 		chooseCoin(tr);
 
 		if(!isTitleCreated){
 			createTitles(propertiesName);
@@ -75,22 +59,70 @@ let createCells = (tr ,properties , coin) =>{
  	table.appendChild(tr);
 }
 
-let uploadInfo = (coin) => {
-	$.ajax({
-		url: "https://min-api.cryptocompare.com/data/price?fsym=" + coin + "&tsyms=BTC,USD",
-		context: document.body
-	}).done(function(coinPrice) {
-		// Create table with coins
-		console.log(coinPrice);
+
+let chooseCoin = (tr) =>{
+	tr.addEventListener("click", (e) => {
+		let $clickedRow = e.target.parentNode;
+		if ($clickedRow.classList.value !== "active") {
+		//open tab and download data
+
+			let coinName = $clickedRow.childNodes[3].innerText,
+				currentPrice;
+				$coinsCotainerRow = document.createElement('tr');
+				$coinsCotainer = document.createElement('td');
+				$coinsCotainerRow.appendChild($coinsCotainer);
+				$coinsCotainer.className = "coins-container";
+				$coinsCotainer.colSpan = "5";
+
+			// download data from API
+			getCurrentPrice(coinName, prices =>{
+				currentPrice = prices;
+			}).then(() =>{
+				getPricesByMonths(currentPrice, coinName);
+			});
+
+			$clickedRow.after($coinsCotainer)
+		}else {
+		//close tab
+			$clickedRow.nextSibling.remove()
+		}
+
+		$clickedRow.classList.toggle("active");
 	});
 }
 
-let uploadInfoByMonth = (coin, time) => {
-	$.ajax({
-		url: "https://min-api.cryptocompare.com/data/pricehistorical?fsym=" + coin + "&tsyms=USD&ts="+ time,
-		context: document.body
-	}).done(function(coinPrice) {
-		// Create table with coins
-		console.log(coinPrice[coin]);
+let getPricesByMonths = (currentPrice, coinName) => {
+
+	let pricesByMonths = [];
+	let monthes = [1 ,3 ,6 ,12, 18, 24];
+
+	monthes.forEach( (month)=>{
+		let ts = moment().subtract(month, 'months').unix();
+		let div = document.createElement('div');
+		div.className = "coin-price";
+
+		uploadInfoByMonth(coinName, ts, prices =>{
+			pricesByMonths.push(prices['USD']);
+			div.innerHTML = `${month} months: <br/>${prices['USD']}$ <br/> x${ (currentPrice['USD']/prices['USD']).toFixed(1)}`
+			$coinsCotainer.appendChild(div);
+		});
+	});
+}
+
+let uploadInfoByMonth = (coin, time, handleData) => {
+	return $.ajax({
+		url: "https://min-api.cryptocompare.com/data/pricehistorical?fsym=" + coin + "&tsyms=BTC,USD&ts="+ time,
+		success: function(info) {
+			handleData(info[coin]);
+		}
+	});
+}
+
+let getCurrentPrice = (coin, handleData) => {
+	return $.ajax({
+		url: "https://min-api.cryptocompare.com/data/price?fsym=" + coin + "&tsyms=BTC,USD",
+		success: function(info) {
+			handleData(info);
+		}
 	});
 }
