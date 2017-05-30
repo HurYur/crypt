@@ -1,6 +1,6 @@
 let coinData;
 $.ajax({
-  	url: "https://api.coinmarketcap.com/v1/ticker/?limit=50",
+  	url: "https://api.coinmarketcap.com/v1/ticker/?limit=200",
   	context: document.body
 }).done(function(data) {
 	// Create table with coins
@@ -94,18 +94,34 @@ let chooseCoin = (tr) =>{
 let getPricesByMonths = (currentPrice, coinName) => {
 
 	let pricesByMonths = [];
-	let monthes = [1 ,3 ,6 ,12, 18, 24];
+	let monthes = [1 ,3 ,6 ,9 ,12, 18, 24];
 
 	monthes.forEach( (month)=>{
 		let ts = moment().subtract(month, 'months').unix();
-		let div = document.createElement('div');
-		div.className = "coin-price";
 
 		uploadInfoByMonth(coinName, ts, prices =>{
-			pricesByMonths.push(prices['USD']);
-			div.innerHTML = `${month} months: <br/>${prices['USD']}$ <br/> x${ (currentPrice['USD']/prices['USD']).toFixed(1)}`
-			$coinsCotainer.appendChild(div);
+			let priceObj = {};
+			priceObj[month] = prices['USD']
+			pricesByMonths.push(priceObj);
+
+		}).then(()=>{
+			if (pricesByMonths.length === monthes.length ) {
+				buildPriceInfoBlock(pricesByMonths, currentPrice);
+			}
 		});
+	});
+}
+let buildPriceInfoBlock = (pricesByMonths, currentPrice)=>{
+	pricesByMonths.sort(function(a, b) {
+	  return Object.keys(a)[0] - Object.keys(b)[0];
+	});
+
+	pricesByMonths.forEach((price)=>{
+		let div = document.createElement('div');
+		div.className = "coin-price";
+		let month = Object.keys(price)[0];
+		div.innerHTML = `${month} months: <br/>${price[month]}$ <br/> x${ (currentPrice['USD']/price[month]).toFixed(1)}`
+		$coinsCotainer.appendChild(div);
 	});
 }
 
