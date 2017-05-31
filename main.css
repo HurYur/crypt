@@ -33,3 +33,6 @@ input{
 	text-align: center;
 	padding: 10px 20px;
 }
+.favorited td:last-child{
+	background-color: yellow;
+}

@@ -8,7 +8,7 @@ $("input[type='number']").change( ()=>{
 });
 
 let filterCoins = (coins, filters) =>{
-	let filteredCoins;
+	let filteredCoins = [];
 
 	if(filters[0] > 0){
 		filteredCoins = coins.filter((coin) => {
@@ -17,12 +17,12 @@ let filterCoins = (coins, filters) =>{
 	}
 	if(filters[1] > 0){
 		filteredCoins = coins.filter((coin) => {
-			return Math.round(coin['price_usd']) > filters[1];
+			return coin['price_usd'] > filters[1];
 		});
 	}
 	if (filters[1] < filters[2]) {
-		filteredCoins = filteredCoins.filter((coin) => {
-			return Math.round(coin['price_usd']) < filters[2];
+		filteredCoins = coins.filter((coin) => {
+			return parseFloat(coin['price_usd']) < parseFloat(filters[2]);
 		});
 	}
 

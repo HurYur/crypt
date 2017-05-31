@@ -1,6 +1,6 @@
 let coinData;
 $.ajax({
-  	url: "https://api.coinmarketcap.com/v1/ticker/?limit=200",
+  	url: "https://api.coinmarketcap.com/v1/ticker/?limit=100",
   	context: document.body
 }).done(function(data) {
 	// Create table with coins
@@ -52,18 +52,59 @@ let createCells = (tr ,properties , coin) =>{
 		}else {
 			td.innerText = coin[property];
 		}
-		
+			
+		let favoritedCoinsList = JSON.parse(localStorage.getItem('favoritedCoins'));
+		if (property === "name" && favoritedCoinsList) {
+			favoritedCoinsList.forEach((favoritedCoin)=>{
+				if(favoritedCoin === coin[property]){
+					tr.className = "favorited";
+				}
+			});
+		}
+
 		tr.appendChild(td);
 	});
+	//favorite_btn
+	let td = document.createElement('td'),
+		favoriteBtn = document.createElement('button');
+		favoriteBtn.innerText = "add";
+		favoriteBtn.addEventListener('click', (e)=>{
+			saveFavorites(e, tr);
+		});
+		td.appendChild(favoriteBtn);
+		tr.appendChild(td);
 
  	table.appendChild(tr);
 }
 
+let saveFavorites = (e, tr) =>{
+	e.stopImmediatePropagation();
+
+	let coinsList = JSON.parse(localStorage.getItem('favoritedCoins'));
+
+	if (!coinsList) {
+		coinsList = [];
+	}
+
+	if(e.target.parentNode.parentNode.classList.value.indexOf('favorited') >= 0 ){
+		for(var i = 0; i < coinsList.length; i++){
+			if(coinsList[i] === e.target.parentNode.parentNode.childNodes[2].innerText){
+				coinsList.splice(i, 1);
+			}
+		}
+	}else {
+		coinsList.push(e.target.parentNode.parentNode.childNodes[2].innerText);
+	}
+
+	localStorage.setItem('favoritedCoins', JSON.stringify(coinsList));
+	e.target.parentNode.parentNode.classList.toggle("favorited");
+
+} 
 
 let chooseCoin = (tr) =>{
 	tr.addEventListener("click", (e) => {
 		let $clickedRow = e.target.parentNode;
-		if ($clickedRow.classList.value !== "active") {
+		if ($clickedRow.classList.value.indexOf("active") < 0) {
 		//open tab and download data
 
 			let coinName = $clickedRow.childNodes[3].innerText,
@@ -72,7 +113,7 @@ let chooseCoin = (tr) =>{
 				$coinsCotainer = document.createElement('td');
 				$coinsCotainerRow.appendChild($coinsCotainer);
 				$coinsCotainer.className = "coins-container";
-				$coinsCotainer.colSpan = "5";
+				$coinsCotainer.colSpan = "6";
 
 			// download data from API
 			getCurrentPrice(coinName, prices =>{
