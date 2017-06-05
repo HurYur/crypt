@@ -1,6 +1,6 @@
 let coinData;
 $.ajax({
-  	url: "https://api.coinmarketcap.com/v1/ticker/?limit=100",
+  	url: "https://api.coinmarketcap.com/v1/ticker/?limit=300",
   	context: document.body
 }).done(function(data) {
 	// Create table with coins
@@ -168,7 +168,7 @@ let buildPriceInfoBlock = (pricesByMonths, currentPrice)=>{
 
 let uploadInfoByMonth = (coin, time, handleData) => {
 	return $.ajax({
-		url: "https://min-api.cryptocompare.com/data/pricehistorical?fsym=" + coin + "&tsyms=BTC,USD&ts="+ time,
+		url: "https://min-api.cryptocompare.com/data/pricehistorical?fsym=" + coin + "&tsyms=USD&ts="+ time,
 		success: function(info) {
 			handleData(info[coin]);
 		}
@@ -177,7 +177,7 @@ let uploadInfoByMonth = (coin, time, handleData) => {
 
 let getCurrentPrice = (coin, handleData) => {
 	return $.ajax({
-		url: "https://min-api.cryptocompare.com/data/price?fsym=" + coin + "&tsyms=BTC,USD",
+		url: "https://min-api.cryptocompare.com/data/price?fsym=" + coin + "&tsyms=USD",
 		success: function(info) {
 			handleData(info);
 		}
